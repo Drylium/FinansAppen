@@ -3,7 +3,7 @@ import java.util.Scanner;
 public class IncomeMenu extends MainMenu {
 
 
-    public void print(Scanner scanner, Finance finance, Account account) {
+    public void print(Scanner scanner, Banking finance, Account account) {
         String output = """
                 1. Se inkomst årligt
                 2. Se inkomst månadsvis
@@ -16,7 +16,7 @@ public class IncomeMenu extends MainMenu {
     }
 
 
-    private void handle(int choice, Finance finance, Account account) {
+    private void handle(int choice, Banking finance, Account account) {
         switch (choice) {
             case 1:
                 finance.viewIncomeByYear(account);

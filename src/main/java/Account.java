@@ -2,6 +2,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Account {
+    private int id;
     private double balance;
     private final List<Transaction> transactions = new ArrayList<>();
 

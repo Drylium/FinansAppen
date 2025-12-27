@@ -7,13 +7,15 @@ public class Transaction {
     private String type;
     private LocalDate date;
     private double sum;
+    private final Account account;
 
-    public Transaction(String type, LocalDate date, double sum) {
+    public Transaction(String type, LocalDate date, double sum, Account account) {
         this.type = type;
         this.date = date;
         this.sum = sum;
         Random ran = new Random();
         this.id = ran.nextInt(0, 10000);
+        this.account = account;
     }
 
     public int getId() {
@@ -51,5 +53,9 @@ public class Transaction {
     @Override
     public String toString() {
         return String.format("typ: %s - datum: %s - summa: %f", type, date.toString(), sum);
+    }
+
+    public Account getAccount() {
+        return account;
     }
 }

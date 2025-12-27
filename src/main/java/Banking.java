@@ -1,5 +1,5 @@
 
-public interface Finance {
+public interface Banking {
     void add(Account account);
 
     void delete(Account account);

@@ -1,14 +1,30 @@
-import java.awt.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.temporal.WeekFields;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
-public class FinanceImpl implements Finance {
+public class BankingImpl implements Banking {
     private final Scanner scanner;
 
-    public FinanceImpl(Scanner scanner) {
+    public BankingImpl(Scanner scanner) throws SQLException {
+        String url = System.getenv("DATABASE_URL");
+        String user = System.getenv("DATABASE_USER");
+        String password = System.getenv("DATABASE_PASSWORD");
         this.scanner = scanner;
+        Connection connection = DriverManager.getConnection(url, user, password);
+
+        try (Statement statement = connection.createStatement()) {
+            statement.execute("CREATE TABLE IF NOT EXISTS transaction (" +
+                    "id UUID PRIMARY KEY," +
+                    "type TEXT," +
+                    "date DATE," +
+                    "sum NUMERIC," +
+                    "account_id UUID not null)");
+        }
     }
 
     // , String type, double sum, Date date
@@ -24,7 +40,7 @@ public class FinanceImpl implements Finance {
             System.out.println("Ange summa (negativt för utgifter): ");
             double sum = scanner.nextDouble();
 
-            Transaction transaction = new Transaction(type, date, sum);
+            Transaction transaction = new Transaction(type, date, sum, account);
             account.addTransaction(transaction);
             System.out.printf("You have added transcation with id %d%n", transaction.getId());
             System.out.printf("Nuvarande kontobalans: %s%n", account.getBalance());
@@ -50,6 +66,7 @@ public class FinanceImpl implements Finance {
 
     @Override
     public void viewBalance(Account account) { //ta fram saldot
+        // SELECT balance FROM account where id = (account.getId())
         System.out.printf("Ditt konto: %s%n", account.getBalance());
 
     }
@@ -57,6 +74,7 @@ public class FinanceImpl implements Finance {
     @Override
     public void viewSpendingsByYear(Account account) { //få fram årlig spendering
         try {
+            // SELECT * from transcation where balance < 0 and date like år% (2024%)
             System.out.println("Ange år (yyyy):");
             String years = scanner.next();
             for (Transaction transaction : account.getTransactions()) {
@@ -76,6 +94,7 @@ public class FinanceImpl implements Finance {
     @Override
     public void viewSpendingsByMonth(Account account) {
         try {
+            // SELECT * from transcation where balance < 0 and date like år-mm% (2024-01%)
             System.out.println("Ange år och månad (yyyy-mm):");
             String months = scanner.next();
             for (Transaction transaction : account.getTransactions()) {
@@ -98,9 +117,10 @@ public class FinanceImpl implements Finance {
             String years = scanner.next();
             System.out.println("Ange vecka (VV):");
             String weeks = scanner.next();
+            // Hämta allt för ett år, kör logik nedan
             for (Transaction transaction : account.getTransactions()) {
                 String transactionDate = transaction.getDate().toString();
-                if (transactionDate.contains(years)) {
+                if (transactionDate.contains(years)) { //Behövs ej (hämta för år med sql)
                     String weekNumber = String.valueOf(transaction.getDate().get(WeekFields.ISO.weekOfWeekBasedYear()));
                     if (weekNumber.equals(weeks)) {
                         if (transaction.getSum() < 0) {
@@ -118,6 +138,7 @@ public class FinanceImpl implements Finance {
     @Override
     public void viewSpendingsByDay(Account account) {
         try {
+            // SELECT * from transcation where balance < 0 and date = år-mm-DD (2024-01-01)
             System.out.println("Ange år,månad och dag (yyyy-mm-dd):");
             String days = scanner.next();
             for (Transaction transaction : account.getTransactions()) {

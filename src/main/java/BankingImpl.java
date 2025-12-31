@@ -48,8 +48,9 @@ public class BankingImpl implements Banking {
 
     // , String type, double sum, Date date
     @Override
-    public void add(Account account) {  //Funktion att lägga till saldo, både positivt och negativt
-        try {
+    public void add(Account account) {
+        String query  = "INSERT into balance (id, type, date, sum, account_id) values (DEFAULT, ?, ?, ?, ?);";
+         try (PreparedStatement statement = getConnection().prepareStatement(query)) {
             System.out.println("Ange transaktionstyp: ");
             String type = scanner.next();
 
@@ -59,25 +60,27 @@ public class BankingImpl implements Banking {
             System.out.println("Ange summa (negativt för utgifter): ");
             double sum = scanner.nextDouble();
 
-            Transaction transaction = new Transaction(type, date, sum, account);
-            account.addTransaction(transaction);
-            System.out.printf("You have added transcation with id %d%n", transaction.getId());
-            System.out.printf("Nuvarande kontobalans: %s%n", account.getBalance());
-        } catch (InputMismatchException e) {
-            System.out.println("Invalid transcationtype");
+            statement.setString(1, type);
+            statement.setDate(2, java.sql.Date.valueOf(date));
+            statement.setDouble(3, sum);
+            statement.setInt(4, account.getId());
+            statement.execute();
+        }
+        catch (InputMismatchException | SQLException e) {
+            System.out.println("Try again");
         }
     }
 
     @Override
     public void delete(Account account) { //för att ta bort en transaktion genom att ange det ID den fick
-        try {
+        String query = "DELETE FROM transaction where id = ?";
+        try (PreparedStatement statement = getConnection().prepareStatement(query)) {
             System.out.println("Ange ID på transaktion du vill ta bort ");
             int id = scanner.nextInt();
-            account.getTransactions().removeIf(transaction -> transaction.getId() == id);
-            account.updateBalance();
+            statement.setInt(1, id);
             System.out.println("Transaktion borttagen");
 
-        } catch (InputMismatchException e) {
+        } catch (InputMismatchException | SQLException e) {
             System.out.println("Invalid ID number");
         }
 
@@ -85,10 +88,13 @@ public class BankingImpl implements Banking {
 
     @Override
     public void viewBalance(Account account)  {
-        String query = "SELECT * FROM balance";
+        String query = "SELECT * FROM account WHERE id = ?";
         try (PreparedStatement statement = getConnection().prepareStatement(query)) {
-            statement.execute("SELECT balance FROM account where id = (account.getId())");
-            System.out.printf("Ditt konto: %s%n", account.getBalance());
+            statement.setInt(1, account.getId());
+            ResultSet result = statement.executeQuery();
+            while (result.next()) {
+                System.out.println(result.getDouble("balance"));
+            }
         }
         catch (InputMismatchException | SQLException e) {
             System.out.println("Try again");

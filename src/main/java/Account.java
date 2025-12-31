@@ -14,6 +14,8 @@ public class Account {
         return balance;
     }
 
+    public int getId() { return id;}
+
     public List<Transaction> getTransactions() {
         return transactions;
     }

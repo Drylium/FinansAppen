@@ -52,7 +52,7 @@ public class Transaction {
 
     @Override
     public String toString() {
-        return String.format("typ: %s - datum: %s - summa: %f", type, date.toString(), sum);
+        return String.format("typ: %s - datum: %s - summa: %f - id: %s", type, date.toString(), sum, id);
     }
 
     public Account getAccount() {

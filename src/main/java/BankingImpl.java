@@ -15,6 +15,19 @@ public class BankingImpl implements Banking {
         return connection;
     }
 
+    private static void printTransactions(Account account, ResultSet result) throws SQLException {
+        while (result.next()) {
+            Transaction transaction = new Transaction(
+                    result.getString("type"),
+                    result.getDate("date").toLocalDate(),
+                    result.getDouble("sum"),
+                    account);
+            transaction.setId(result.getInt("number"));
+            System.out.println(transaction);
+        }
+    }
+
+
 
     public BankingImpl(Scanner scanner) throws SQLException {
         String url = System.getenv("DATABASE_URL");
@@ -71,74 +84,57 @@ public class BankingImpl implements Banking {
     }
 
     @Override
-    public void viewBalance(Account account) throws SQLException { //ta fram saldot
-        try (Statement statement = getConnection().createStatement()) {
+    public void viewBalance(Account account)  {
+        String query = "SELECT * FROM balance";
+        try (PreparedStatement statement = getConnection().prepareStatement(query)) {
             statement.execute("SELECT balance FROM account where id = (account.getId())");
             System.out.printf("Ditt konto: %s%n", account.getBalance());
         }
-
+        catch (InputMismatchException | SQLException e) {
+            System.out.println("Try again");
+        }
     }
+
 
     @Override
-    public void viewSpendingsByYear(Account account) throws SQLException { //få fram årlig spendering
-        try (Statement statement = getConnection().createStatement()) {
-            //PreparedStatement statement1;
-            //statement1 = getConnection().prepareStatement = ("SELECT * FROM transaction WHERE balance < 0 and date like CONCAT(?, '%');");
+    public void viewSpendingsByYear(Account account)  { //få fram årlig spendering
+        String query = "SELECT * FROM transaction WHERE balance < 0 and date like CONCAT(?, '%');";
+        try (PreparedStatement statement = getConnection().prepareStatement(query)) {
             System.out.println("Ange år (yyyy):");
             String years = scanner.next();
-            //statement1.setString(1, years);
-            statement.setParameter(years, 1);
-            statement.execute("SELECT * FROM transaction WHERE balance < 0 and date like CONCAT(?, '%');");
-            //statement1.executeQuery();
-            //statement.execute("SELECT * FROM transaction WHERE balance < 0 and date like CONCAT (?, '%')");
-            for (Transaction transaction : account.getTransactions()) {
-                        System.out.println(transaction);
-            }
-        } catch (InputMismatchException e) {
+            statement.setString(1, years);
+            ResultSet result = statement.executeQuery();
+            printTransactions(account, result);
+        } catch (InputMismatchException | SQLException e) {
             System.out.println("Invalid year");
         }
-
     }
+
 
     @Override
     public void viewSpendingsByMonth(Account account) {
-        try {
-            SELECT * from transcation where balance < 0 and date like år-mm% (2024-01%)
-            System.out.println("Ange år och månad (yyyy-mm):");
-            String months = scanner.next();
-            for (Transaction transaction : account.getTransactions()) {
-                String transactionMonth = transaction.getDate().toString();
-                if (transactionMonth.contains(months)) {
-                    if (transaction.getSum() < 0) {
-                        System.out.println(transaction);
-                    }
-                }
-            }
-        } catch (InputMismatchException e) {
+        String query = "SELECT * FROM transaction WHERE balance < 0 and date like CONCAT(?, ?, '%');";
+        try (PreparedStatement statement = getConnection().prepareStatement(query)) {
+            System.out.println("Ange år och månad (yyyy mm):");
+            String years = scanner.next();
+            statement.setString(1, years);
+            ResultSet result = statement.executeQuery();
+            printTransactions(account, result);
+        } catch (InputMismatchException | SQLException e) {
             System.out.println("Invalid Month");
         }
     }
 
     @Override
     public void viewSpendingsByWeek(Account account) {
-        try {
-            System.out.println("Ange år (YYYY):");
+        String query = "SELECT * FROM transaction WHERE balance < 0 and date like CONCAT(?, ?, ?, '%');";
+        try (PreparedStatement statement = getConnection().prepareStatement(query)) {
+            System.out.println("Ange år, månad och vecka (yyyy mm ww):");
             String years = scanner.next();
-            System.out.println("Ange vecka (VV):");
-            String weeks = scanner.next();
-            // Hämta allt för ett år, kör logik nedan
-            for (Transaction transaction : account.getTransactions()) {
-                String transactionDate = transaction.getDate().toString();
-                if (transactionDate.contains(years)) { //Behövs ej (hämta för år med sql)
-                    String weekNumber = String.valueOf(transaction.getDate().get(WeekFields.ISO.weekOfWeekBasedYear()));
-                    if (weekNumber.equals(weeks)) {
-                        if (transaction.getSum() < 0) {
-                            System.out.println(transaction);
-                        }
-                    }
-                }
-            }
-        } catch (InputMismatchException e) {
+            statement.setString(1, years);
+            ResultSet result = statement.executeQuery();
+            printTransactions(account, result);
+        } catch (InputMismatchException | SQLException e) {
             System.out.println("Invalid Week");
         }
 
@@ -146,19 +142,14 @@ public class BankingImpl implements Banking {
 
     @Override
     public void viewSpendingsByDay(Account account) {
-        try {
-            // SELECT * from transcation where balance < 0 and date = år-mm-DD (2024-01-01)
-            System.out.println("Ange år,månad och dag (yyyy-mm-dd):");
-            String days = scanner.next();
-            for (Transaction transaction : account.getTransactions()) {
-                String transactionMonth = transaction.getDate().toString();
-                if (transactionMonth.contains(days)) {
-                    if (transaction.getSum() < 0) {
-                        System.out.println(transaction);
-                    }
-                }
-            }
-        } catch (InputMismatchException e) {
+        String query = "SELECT * FROM transaction WHERE balance < 0 and date like CONCAT(?, ?, ?, ?, '%');";
+        try (PreparedStatement statement = getConnection().prepareStatement(query)) {
+            System.out.println("Ange år, månad, vecka och dag (yyyy mm ww dd):");
+            String years = scanner.next();
+            statement.setString(1, years);
+            ResultSet result = statement.executeQuery();
+            printTransactions(account, result);
+        } catch (InputMismatchException | SQLException e) {
             System.out.println("Invalid Day");
         }
 
@@ -166,18 +157,14 @@ public class BankingImpl implements Banking {
 
     @Override
     public void viewIncomeByYear(Account account) {
-        try {
-            System.out.println("Ange år (yyyy):");
-            String years = scanner.next();
-            for (Transaction transaction : account.getTransactions()) {
-                String transactionDate = transaction.getDate().toString();
-                if (transactionDate.contains(years)) {
-                    if (transaction.getSum() > 0) {
-                        System.out.println(transaction);
-                    }
-                }
-            }
-        } catch (InputMismatchException e) {
+            String query = "SELECT * FROM transaction WHERE balance > 0 and date like CONCAT(?, '%');";
+            try (PreparedStatement statement = getConnection().prepareStatement(query)) {
+                System.out.println("Ange år (yyyy):");
+                String years = scanner.next();
+                statement.setString(1, years);
+                ResultSet result = statement.executeQuery();
+                printTransactions(account, result);
+        } catch (InputMismatchException | SQLException e) {
             System.out.println("Invalid year");
         }
 
@@ -185,18 +172,14 @@ public class BankingImpl implements Banking {
 
     @Override
     public void viewIncomeByMonth(Account account) {
-        try {
-            System.out.println("Ange år och månad (yyyy-mm):");
-            String months = scanner.next();
-            for (Transaction transaction : account.getTransactions()) {
-                String transactionDate = transaction.getDate().toString();
-                if (transactionDate.contains(months)) {
-                    if (transaction.getSum() > 0) {
-                        System.out.println(transaction);
-                    }
-                }
-            }
-        } catch (InputMismatchException e) {
+        String query = "SELECT * FROM transaction WHERE balance > 0 and date like CONCAT(?, ?, '%');";
+        try (PreparedStatement statement = getConnection().prepareStatement(query)) {
+            System.out.println("Ange år och månad (yyyy MM):");
+            String years = scanner.next();
+            statement.setString(1, years);
+            ResultSet result = statement.executeQuery();
+            printTransactions(account, result);
+        } catch (InputMismatchException | SQLException e) {
             System.out.println("Invalid month");
         }
 
@@ -204,23 +187,14 @@ public class BankingImpl implements Banking {
 
     @Override
     public void viewIncomeByWeek(Account account) {
-        try {
-            System.out.println("Ange år (YYYY):");
+        String query = "SELECT * FROM transaction WHERE balance > 0 and date like CONCAT(?, ?, ?, '%');";
+        try (PreparedStatement statement = getConnection().prepareStatement(query)) {
+            System.out.println("Ange år, månad och vecka (yyyy mm ww):");
             String years = scanner.next();
-            System.out.println("Ange vecka (VV):");
-            String weeks = scanner.next();
-            for (Transaction transaction : account.getTransactions()) {
-                String transactionDate = transaction.getDate().toString();
-                if (transactionDate.contains(years)) {
-                    String weekNumber = String.valueOf(transaction.getDate().get(WeekFields.ISO.weekOfWeekBasedYear()));
-                    if (weekNumber.equals(weeks)) {
-                        if (transaction.getSum() > 0) {
-                            System.out.println(transaction);
-                        }
-                    }
-                }
-            }
-        } catch (InputMismatchException e) {
+            statement.setString(1, years);
+            ResultSet result = statement.executeQuery();
+            printTransactions(account, result);
+        } catch (InputMismatchException | SQLException e) {
             System.out.println("Invalid Week");
         }
 
@@ -228,18 +202,14 @@ public class BankingImpl implements Banking {
 
     @Override
     public void viewIncomeByDay(Account account) {
-        try {
-            System.out.println("Ange år, månad och dag(yyyy-mm-dd):");
-            String days = scanner.next();
-            for (Transaction transaction : account.getTransactions()) {
-                String transactionDate = transaction.getDate().toString();
-                if (transactionDate.contains(days)) {
-                    if (transaction.getSum() > 0) {
-                        System.out.println(transaction);
-                    }
-                }
-            }
-        } catch (InputMismatchException e) {
+        String query = "SELECT * FROM transaction WHERE balance > 0 and date like CONCAT(?, ?, ?, ?, '%');";
+        try (PreparedStatement statement = getConnection().prepareStatement(query)) {
+            System.out.println("Ange år, månad, vecka och dag (yyyy mm ww dd):");
+            String years = scanner.next();
+            statement.setString(1, years);
+            ResultSet result = statement.executeQuery();
+            printTransactions(account, result);
+        } catch (InputMismatchException | SQLException e) {
             System.out.println("Invalid day");
         }
 

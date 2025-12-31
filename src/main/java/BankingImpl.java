@@ -1,7 +1,4 @@
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.time.LocalDate;
 import java.time.temporal.WeekFields;
 import java.util.InputMismatchException;
@@ -9,6 +6,15 @@ import java.util.Scanner;
 
 public class BankingImpl implements Banking {
     private final Scanner scanner;
+
+    private Connection getConnection () throws SQLException {
+        String url = System.getenv("DATABASE_URL");
+        String user = System.getenv("DATABASE_USER");
+        String password = System.getenv("DATABASE_PASSWORD");
+        Connection connection = DriverManager.getConnection(url, user, password);
+        return connection;
+    }
+
 
     public BankingImpl(Scanner scanner) throws SQLException {
         String url = System.getenv("DATABASE_URL");
@@ -65,25 +71,28 @@ public class BankingImpl implements Banking {
     }
 
     @Override
-    public void viewBalance(Account account) { //ta fram saldot
-        // SELECT balance FROM account where id = (account.getId())
-        System.out.printf("Ditt konto: %s%n", account.getBalance());
+    public void viewBalance(Account account) throws SQLException { //ta fram saldot
+        try (Statement statement = getConnection().createStatement()) {
+            statement.execute("SELECT balance FROM account where id = (account.getId())");
+            System.out.printf("Ditt konto: %s%n", account.getBalance());
+        }
 
     }
 
     @Override
-    public void viewSpendingsByYear(Account account) { //få fram årlig spendering
-        try {
-            // SELECT * from transcation where balance < 0 and date like år% (2024%)
+    public void viewSpendingsByYear(Account account) throws SQLException { //få fram årlig spendering
+        try (Statement statement = getConnection().createStatement()) {
+            //PreparedStatement statement1;
+            //statement1 = getConnection().prepareStatement = ("SELECT * FROM transaction WHERE balance < 0 and date like CONCAT(?, '%');");
             System.out.println("Ange år (yyyy):");
             String years = scanner.next();
+            //statement1.setString(1, years);
+            statement.setParameter(years, 1);
+            statement.execute("SELECT * FROM transaction WHERE balance < 0 and date like CONCAT(?, '%');");
+            //statement1.executeQuery();
+            //statement.execute("SELECT * FROM transaction WHERE balance < 0 and date like CONCAT (?, '%')");
             for (Transaction transaction : account.getTransactions()) {
-                String transactionDate = transaction.getDate().toString();
-                if (transactionDate.contains(years)) {
-                    if (transaction.getSum() < 0) {
                         System.out.println(transaction);
-                    }
-                }
             }
         } catch (InputMismatchException e) {
             System.out.println("Invalid year");
@@ -94,7 +103,7 @@ public class BankingImpl implements Banking {
     @Override
     public void viewSpendingsByMonth(Account account) {
         try {
-            // SELECT * from transcation where balance < 0 and date like år-mm% (2024-01%)
+            SELECT * from transcation where balance < 0 and date like år-mm% (2024-01%)
             System.out.println("Ange år och månad (yyyy-mm):");
             String months = scanner.next();
             for (Transaction transaction : account.getTransactions()) {

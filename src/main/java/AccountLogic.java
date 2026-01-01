@@ -10,3 +10,5 @@ public interface AccountLogic {
 
     List<Account> getAllAccounts();
 }
+
+

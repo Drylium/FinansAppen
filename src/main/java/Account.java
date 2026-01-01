@@ -7,6 +7,7 @@ public class Account {
     private final List<Transaction> transactions = new ArrayList<>();
 
     public Account() {
+        this.id = 1;
         this.balance = 0;
     }
 

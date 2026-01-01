@@ -39,6 +39,7 @@ public class MainMenu {
             case 6:
                 AccountLogic accountLogic = new AccountLogicImpl(scanner);
                 accountLogic.add();
+                break;
             case 7:
                 System.exit(0);
             default:

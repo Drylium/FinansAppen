@@ -1,7 +1,8 @@
+import java.sql.SQLException;
 import java.util.Scanner;
 
 public class TransactionMenu extends MainMenu {
-    public void print(Scanner scanner, Banking finance, Account account) {
+    public void print(Scanner scanner, Banking finance, Account account) throws SQLException {
         String output = """
                 1. Se transaktion årligt
                 2. Se transaktion månadsvis
@@ -13,7 +14,7 @@ public class TransactionMenu extends MainMenu {
         handle(choice, finance, account);
     }
 
-    private void handle(int choice, Banking finance, Account account) {
+    private void handle(int choice, Banking finance, Account account) throws SQLException {
         switch (choice) {
             case 1:
                 finance.viewSpendingsByYear(account);

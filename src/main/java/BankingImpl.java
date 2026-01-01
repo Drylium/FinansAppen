@@ -105,7 +105,7 @@ public class BankingImpl implements Banking {
 
     @Override
     public void viewSpendingsByYear(Account account) throws SQLException { //få fram årlig spendering
-        String query = "SELECT * FROM transaction WHERE transaction < 0 and date like CONCAT(?, '%');";
+        String query = "SELECT * FROM transaction WHERE balance < 0 and date like CONCAT(?, '%');";
         try (PreparedStatement statement = getConnection().prepareStatement(query)) {
             System.out.println("Ange år (yyyy):");
             String years = scanner.next();
@@ -120,7 +120,7 @@ public class BankingImpl implements Banking {
 
     @Override
     public void viewSpendingsByMonth(Account account) throws SQLException {
-        String query = "SELECT * FROM transaction WHERE transaction < 0 and date like CONCAT(?, '%');";
+        String query = "SELECT * FROM transaction WHERE balance < 0 and date like CONCAT(?, '%');";
         try (PreparedStatement statement = getConnection().prepareStatement(query)) {
             System.out.println("Ange år och månad (yyyy-mm):");
             String years = scanner.next();
@@ -135,7 +135,7 @@ public class BankingImpl implements Banking {
 
     @Override
     public void viewSpendingsByWeek(Account account) throws SQLException {
-        String query = "SELECT * FROM transaction WHERE transaction < 0 and DATE_PART('year', date) = ? and DATE_PART('week', date) = ?;";
+        String query = "SELECT * FROM transaction WHERE balance < 0 and DATE_PART('year', date) = ? and DATE_PART('week', date) = ?;";
         try (PreparedStatement statement = getConnection().prepareStatement(query)) {
             System.out.println("Ange år (yyyy):");
             String years = scanner.next();
@@ -155,7 +155,7 @@ public class BankingImpl implements Banking {
 
     @Override
     public void viewSpendingsByDay(Account account) throws SQLException {
-        String query = "SELECT * FROM transaction WHERE transaction < 0 and date like CONCAT(?, '%');";
+        String query = "SELECT * FROM transaction WHERE balance < 0 and date like CONCAT(?, '%');";
         try (PreparedStatement statement = getConnection().prepareStatement(query)) {
             System.out.println("Ange år, månad och dag (yyyy-mm-dd):");
             String years = scanner.next();
@@ -170,7 +170,7 @@ public class BankingImpl implements Banking {
 
     @Override
     public void viewIncomeByYear(Account account) throws SQLException {
-            String query = "SELECT * FROM transaction WHERE transaction > 0 and date like CONCAT(?, '%');";
+            String query = "SELECT * FROM transaction WHERE balance > 0 and date like CONCAT(?, '%');";
             try (PreparedStatement statement = getConnection().prepareStatement(query)) {
                 System.out.println("Ange år (yyyy):");
                 String years = scanner.next();
@@ -185,7 +185,7 @@ public class BankingImpl implements Banking {
 
     @Override
     public void viewIncomeByMonth(Account account) throws SQLException {
-        String query = "SELECT * FROM transaction WHERE transaction > 0 and date like CONCAT(?, '%');";
+        String query = "SELECT * FROM transaction WHERE balance > 0 and date like CONCAT(?, '%');";
         try (PreparedStatement statement = getConnection().prepareStatement(query)) {
             System.out.println("Ange år och månad (yyyy-MM):");
             String years = scanner.next();
@@ -200,7 +200,7 @@ public class BankingImpl implements Banking {
 
     @Override
     public void viewIncomeByWeek(Account account) throws SQLException {
-        String query = "SELECT * FROM transaction WHERE transaction > 0 and DATE_PART('year', date) = ? and DATE_PART('week', date) = ?;";
+        String query = "SELECT * FROM transaction WHERE balance > 0 and DATE_PART('year', date) = ? and DATE_PART('week', date) = ?;";
         try (PreparedStatement statement = getConnection().prepareStatement(query)) {
             System.out.println("Ange år (yyyy):");
             String years = scanner.next();
@@ -220,7 +220,7 @@ public class BankingImpl implements Banking {
 
     @Override
     public void viewIncomeByDay(Account account) throws SQLException {
-        String query = "SELECT * FROM transaction WHERE transaction > 0 and date like CONCAT(?, '%');";
+        String query = "SELECT * FROM transaction WHERE balance > 0 and date like CONCAT(?, '%');";
         try (PreparedStatement statement = getConnection().prepareStatement(query)) {
             System.out.println("Ange år, månad och dag (yyyy-mm-dd):");
             String years = scanner.next();

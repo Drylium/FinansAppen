@@ -38,7 +38,6 @@ public class BankingImpl implements Banking {
         Connection connection = DriverManager.getConnection(url, user, password);
 
         try (Statement statement = connection.createStatement()) {
-            //statement.execute("DROP TABLE transaction");
             statement.execute("CREATE TABLE IF NOT EXISTS transaction (" +
                     "id SERIAL PRIMARY KEY," +
                     "type TEXT," +
